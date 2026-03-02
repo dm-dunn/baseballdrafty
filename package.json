@@ -1,0 +1,13 @@
+{
+  "name": "baseballdrafty",
+  "private": true,
+  "scripts": {
+    "test:bots":   "concurrently --kill-others --names \"server,client,bots\" -c \"cyan,green,yellow\" \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"node server/botWaiter.js 3\"",
+    "test:bots:2": "concurrently --kill-others --names \"server,client,bots\" -c \"cyan,green,yellow\" \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"node server/botWaiter.js 2\"",
+    "test:bots:5": "concurrently --kill-others --names \"server,client,bots\" -c \"cyan,green,yellow\" \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"node server/botWaiter.js 5\"",
+    "test:bots:9": "concurrently --kill-others --names \"server,client,bots\" -c \"cyan,green,yellow\" \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"node server/botWaiter.js 9\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

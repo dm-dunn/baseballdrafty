@@ -2,9 +2,8 @@ services:
   - type: web
     name: baseballdrafty
     runtime: node
-    rootDir: server
-    buildCommand: cd ../client && npm install && npm run build && cd ../server && npm install
-    startCommand: npm start
+    buildCommand: npm install --prefix client && npm run build --prefix client && npm install --prefix server
+    startCommand: node server/server.js
     envVars:
       - key: NODE_ENV
         value: production

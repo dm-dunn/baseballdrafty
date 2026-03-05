@@ -119,86 +119,98 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
   }
 
   return (
-    <div className="flex flex-col px-3 py-2" style={{ height: '100dvh' }}>
-      {/* Title bar — compact, fixed height */}
-      <div className="flex items-center justify-between mb-2 flex-shrink-0">
-        <div>
-          <h1 className="font-display text-2xl tracking-widest text-[#f59e0b] leading-none">RACE IN PROGRESS</h1>
-          <p className="text-[10px] text-[#7d8590] uppercase tracking-widest mt-0.5">
-            Lobby: <span className="font-mono text-[#f59e0b]">{lobbyCode}</span>
-          </p>
-        </div>
-        {draftOrder && !showResults && (
-          <button
-            onClick={() => setShowResults(true)}
-            className="text-xs px-4 py-2 bg-[#161b22] border border-[#30363d] rounded-lg text-[#7d8590] hover:text-white hover:border-white transition-all"
-          >
-            View Results
-          </button>
-        )}
-      </div>
-
-      {/* Canvas area — grows to fill remaining vertical space, never overflows */}
-      <div className="flex-1 min-h-0 flex items-center justify-center relative">
-        {/* Countdown overlay */}
-        {!racing && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 rounded-2xl">
-            <div
-              className="font-display text-9xl text-[#f59e0b]"
-              style={{ textShadow: '0 0 40px rgba(245,158,11,0.8)' }}
-            >
-              {countdown > 0 ? countdown : 'GO!'}
-            </div>
+    /*
+     * Portrait-mobile rotation wrapper.
+     * On portrait screens (phone held upright) we rotate the entire race UI
+     * 90° counter-clockwise so the landscape canvas fills the screen naturally.
+     * Width/height are swapped to match the rotated dimensions.
+     * On landscape or desktop nothing changes.
+     */
+    <div className="portrait:overflow-hidden portrait:fixed portrait:inset-0">
+      <div
+        className="flex flex-col px-3 py-2 portrait:[transform:rotate(-90deg)] portrait:[transform-origin:left_top] portrait:[width:100dvh] portrait:[height:100dvw] portrait:[position:absolute] portrait:[top:100%] portrait:[left:0]"
+        style={{ height: '100dvh' }}
+      >
+        {/* Title bar — compact, fixed height */}
+        <div className="flex items-center justify-between mb-2 flex-shrink-0">
+          <div>
+            <h1 className="font-display text-2xl tracking-widest text-[#f59e0b] leading-none portrait:text-lg">RACE IN PROGRESS</h1>
+            <p className="text-[10px] text-[#7d8590] uppercase tracking-widest mt-0.5">
+              Lobby: <span className="font-mono text-[#f59e0b]">{lobbyCode}</span>
+            </p>
           </div>
-        )}
+          {draftOrder && !showResults && (
+            <button
+              onClick={() => setShowResults(true)}
+              className="text-xs px-4 py-2 bg-[#161b22] border border-[#30363d] rounded-lg text-[#7d8590] hover:text-white hover:border-white transition-all"
+            >
+              View Results
+            </button>
+          )}
+        </div>
 
-        {/* Event banners — stacked, newest on top, fade+slide out at end of life */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
-          {eventBanners.map((ev) => {
-            const s = EVENT_STYLES[ev.type] || EVENT_STYLES.stun;
-            // Fade+slide starts EVENT_FADE_MS before removal
-            const fadeDelay = Math.max(0, EVENT_SHOW_MS - EVENT_FADE_MS);
-            return (
+        {/* Canvas area — grows to fill remaining vertical space, never overflows */}
+        <div className="flex-1 min-h-0 flex items-center justify-center relative">
+          {/* Countdown overlay */}
+          {!racing && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 rounded-2xl">
               <div
-                key={ev.id}
-                className="px-8 py-3 rounded-2xl text-center font-semibold text-sm whitespace-nowrap"
-                style={{
-                  background:  s.bg,
-                  border:      `1px solid ${s.border}`,
-                  boxShadow:   `0 0 24px ${s.glow}88`,
-                  animation:   `event-enter 0.25s ease-out, event-exit ${EVENT_FADE_MS}ms ease-in ${fadeDelay}ms forwards`,
-                }}
+                className="font-display text-9xl text-[#f59e0b]"
+                style={{ textShadow: '0 0 40px rgba(245,158,11,0.8)' }}
               >
-                <div className="text-white font-bold text-base">{ev.targetName}</div>
-                <div className="text-[#e6edf3] mt-0.5">{ev.text}</div>
+                {countdown > 0 ? countdown : 'GO!'}
               </div>
-            );
-          })}
+            </div>
+          )}
+
+          {/* Event banners — stacked, newest on top, fade+slide out at end of life */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
+            {eventBanners.map((ev) => {
+              const s = EVENT_STYLES[ev.type] || EVENT_STYLES.stun;
+              // Fade+slide starts EVENT_FADE_MS before removal
+              const fadeDelay = Math.max(0, EVENT_SHOW_MS - EVENT_FADE_MS);
+              return (
+                <div
+                  key={ev.id}
+                  className="px-8 py-3 rounded-2xl text-center font-semibold text-sm whitespace-nowrap portrait:text-xs portrait:px-4 portrait:py-2"
+                  style={{
+                    background:  s.bg,
+                    border:      `1px solid ${s.border}`,
+                    boxShadow:   `0 0 24px ${s.glow}88`,
+                    animation:   `event-enter 0.25s ease-out, event-exit ${EVENT_FADE_MS}ms ease-in ${fadeDelay}ms forwards`,
+                  }}
+                >
+                  <div className="text-white font-bold text-base portrait:text-sm">{ev.targetName}</div>
+                  <div className="text-[#e6edf3] mt-0.5">{ev.text}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Canvas — constrained by both width AND height, aspect ratio preserved */}
+          <div
+            className="bg-[#0d1117] border border-[#30363d] rounded-2xl overflow-hidden shadow-2xl w-full h-full"
+            style={{ aspectRatio: `${CANVAS_WIDTH}/${CANVAS_HEIGHT}`, maxHeight: '100%', maxWidth: '100%' }}
+          >
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              className="w-full h-full"
+            />
+          </div>
         </div>
 
-        {/* Canvas — constrained by both width AND height, aspect ratio preserved */}
-        <div
-          className="bg-[#0d1117] border border-[#30363d] rounded-2xl overflow-hidden shadow-2xl w-full h-full"
-          style={{ aspectRatio: `${CANVAS_WIDTH}/${CANVAS_HEIGHT}`, maxHeight: '100%', maxWidth: '100%' }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            className="w-full h-full"
+        {/* Results modal */}
+        {showResults && draftOrder && (
+          <Results
+            draftOrder={draftOrder}
+            isHost={isHost}
+            lobbyCode={lobbyCode}
+            onRestart={handleRestart}
           />
-        </div>
+        )}
       </div>
-
-      {/* Results modal */}
-      {showResults && draftOrder && (
-        <Results
-          draftOrder={draftOrder}
-          isHost={isHost}
-          lobbyCode={lobbyCode}
-          onRestart={handleRestart}
-        />
-      )}
     </div>
   );
 }

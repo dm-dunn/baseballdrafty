@@ -58,12 +58,12 @@ export default function Home({ onGameCreated, onGameJoined }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {/* Logo */}
-      <div className="text-center mb-10">
-        <div className="text-7xl mb-2">⚾</div>
-        <h1 className="font-display text-6xl tracking-widest text-[#f59e0b]" style={{letterSpacing:'0.15em'}}>
+      <div className="text-center mb-10 portrait:mb-5">
+        <div className="text-7xl mb-2 portrait:text-5xl">⚾</div>
+        <h1 className="font-display text-6xl tracking-widest text-[#f59e0b] portrait:text-4xl" style={{letterSpacing:'0.15em'}}>
           DRAFT RANDOMIZER
         </h1>
-        <p className="text-[#7d8590] font-body mt-1 text-sm tracking-widest uppercase">
+        <p className="text-[#7d8590] font-body mt-1 text-sm tracking-widest uppercase portrait:text-xs">
           Who picks first? Let the diamond decide.
         </p>
       </div>

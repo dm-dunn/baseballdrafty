@@ -8,6 +8,11 @@ export default {
         body:    ['"DM Sans"', 'sans-serif'],
         mono:    ['"JetBrains Mono"', 'monospace'],
       },
+      // Add portrait/landscape variants without replacing the default sm/md/lg breakpoints
+      screens: {
+        portrait:  { raw: '(orientation: portrait)' },
+        landscape: { raw: '(orientation: landscape)' },
+      },
     },
   },
   plugins: [],

@@ -111,13 +111,13 @@ export default function Lobby({ lobbyCode, myPlayer, lobby, setLobby }) {
 
   // ── UI ──────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 portrait:justify-start portrait:pt-6">
       <div className="w-full max-w-lg">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 portrait:mb-4">
           <p className="text-xs uppercase tracking-widest text-[#7d8590] mb-1">Lobby Code</p>
           <div className="flex items-center justify-center gap-3">
-            <span className="font-mono text-5xl font-bold text-[#f59e0b] tracking-[0.2em]">
+            <span className="font-mono text-5xl font-bold text-[#f59e0b] tracking-[0.2em] portrait:text-3xl">
               {lobbyCode}
             </span>
             <button
@@ -144,7 +144,7 @@ export default function Lobby({ lobbyCode, myPlayer, lobby, setLobby }) {
           {lobby.players.map((p) => (
             <div
               key={p.id}
-              className="flex items-center gap-4 px-5 py-3.5 border-b border-[#30363d] last:border-0"
+              className="flex items-center gap-4 px-5 py-3.5 border-b border-[#30363d] last:border-0 portrait:py-2 portrait:px-3 portrait:gap-3"
             >
               {/* Color marble */}
               <div
@@ -232,7 +232,7 @@ export default function Lobby({ lobbyCode, myPlayer, lobby, setLobby }) {
         )}
 
         {/* Color picker */}
-        <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 mb-4">
+        <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-5 mb-4 portrait:p-3 portrait:mb-3">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs uppercase tracking-widest text-[#7d8590]">Pick Your Color</span>
             {!colorConfirmed && (
@@ -256,7 +256,7 @@ export default function Lobby({ lobbyCode, myPlayer, lobby, setLobby }) {
                   disabled={isTaken}
                   onClick={() => handlePickColor(c)}
                   style={{ backgroundColor: css }}
-                  className={`relative w-10 h-10 rounded-full transition-all border-2 ${
+                  className={`relative w-10 h-10 portrait:w-8 portrait:h-8 rounded-full transition-all border-2 ${
                     isMe
                       ? 'border-white scale-125 shadow-lg shadow-white/20'
                       : isTaken

@@ -76,11 +76,11 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
 
   // ── Socket: live game state ─────────────────────────────────────────
   useEffect(() => {
-    socket.on('gameState', ({ marbles }) => {
+    function onGameState({ marbles }) {
       marblesRef.current = marbles;
-    });
+    }
 
-    socket.on('gameEvent', (ev) => {
+    function onGameEvent(ev) {
       const id   = `${Date.now()}-${Math.random()}`;
       const type = guessEventType(ev.eventId);
       const banner = { id, text: ev.eventText, targetName: ev.targetName, targetColor: ev.targetColor, type, bornAt: Date.now() };
@@ -92,18 +92,22 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
       setTimeout(() => {
         setEventBanners(prev => prev.filter(b => b.id !== id));
       }, EVENT_SHOW_MS);
-    });
+    }
 
-    socket.on('gameOver', ({ draftOrder }) => {
+    function onGameOver({ draftOrder }) {
       audioRef.current?.stopBackgroundMusic();
       setDraftOrder(draftOrder);
       setTimeout(() => setShowResults(true), 800); // brief pause
-    });
+    }
+
+    socket.on('gameState', onGameState);
+    socket.on('gameEvent', onGameEvent);
+    socket.on('gameOver',  onGameOver);
 
     return () => {
-      socket.off('gameState');
-      socket.off('gameEvent');
-      socket.off('gameOver');
+      socket.off('gameState', onGameState);
+      socket.off('gameEvent', onGameEvent);
+      socket.off('gameOver',  onGameOver);
     };
   }, []);
 

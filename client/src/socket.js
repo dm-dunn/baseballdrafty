@@ -10,8 +10,9 @@ const URL = import.meta.env.VITE_SERVER_URL || undefined;
 
 const socket = io(URL, {
   autoConnect: true,
-  reconnectionAttempts: 5,
+  reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
+  reconnectionDelayMax: 10000,
 });
 
 export default socket;

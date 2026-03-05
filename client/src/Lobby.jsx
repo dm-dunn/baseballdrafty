@@ -33,13 +33,14 @@ export default function Lobby({ lobbyCode, myPlayer, lobby, setLobby }) {
 
   // ── Socket: lobby updates ───────────────────────────────────────────
   useEffect(() => {
-    socket.on('lobbyUpdate', (newLobby) => {
+    function onLobbyUpdate(newLobby) {
       setLobby(newLobby);
       const meNow = newLobby.players.find(p => p.id === socket.id);
       if (meNow) setIsMeReady(meNow.ready);
-    });
+    }
 
-    return () => socket.off('lobbyUpdate');
+    socket.on('lobbyUpdate', onLobbyUpdate);
+    return () => socket.off('lobbyUpdate', onLobbyUpdate);
   }, [setLobby]);
 
   // ── Pick a color ────────────────────────────────────────────────────

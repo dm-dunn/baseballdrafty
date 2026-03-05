@@ -1,6 +1,6 @@
 // App.jsx — Root component managing screen state
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import socket from './socket.js';
 import Home   from './Home.jsx';
 import Lobby  from './Lobby.jsx';
@@ -16,40 +16,65 @@ export default function App() {
   const [lobby,     setLobby]       = useState(null);  // full lobby state
   const [raceData,  setRaceData]    = useState(null);  // initial marble data from raceStarted
 
+  // Keep a ref to lobbyCode so reconnect handler can read it without stale closure
+  const lobbyCodeRef = useRef('');
+
   // ── Global socket listeners ─────────────────────────────────────────
   useEffect(() => {
     // When race starts, switch to Race screen
-    socket.on('raceStarted', (data) => {
+    function onRaceStarted(data) {
       setRaceData(data);
       setScreen('race');
-    });
+    }
 
     // After host resets, return to lobby
-    socket.on('lobbyReset', (lobbyState) => {
+    function onLobbyReset(lobbyState) {
       setLobby(lobbyState);
       setRaceData(null);
       setScreen('lobby');
-    });
+    }
 
     // Keep myPlayer color in sync when player changes it in the lobby
-    socket.on('lobbyUpdate', (lobbyState) => {
+    function onLobbyUpdate(lobbyState) {
       setMyPlayer(prev => {
         if (!prev) return prev;
         const me = lobbyState.players.find(p => p.id === prev.id);
         if (!me || me.color === prev.color) return prev;
         return { ...prev, color: me.color };
       });
-    });
+    }
+
+    // On reconnect, re-sync with the server in case we missed raceStarted
+    function onReconnect() {
+      const code = lobbyCodeRef.current;
+      if (!code) return;
+      socket.emit('getLobbyState', { code }, ({ lobby: lobbyState, error }) => {
+        if (error || !lobbyState) return;
+        setLobby(lobbyState);
+        if (lobbyState.status === 'racing' || lobbyState.status === 'finished') {
+          setScreen('race');
+        } else if (lobbyState.status === 'waiting') {
+          setScreen('lobby');
+        }
+      });
+    }
+
+    socket.on('raceStarted', onRaceStarted);
+    socket.on('lobbyReset',  onLobbyReset);
+    socket.on('lobbyUpdate', onLobbyUpdate);
+    socket.on('reconnect',   onReconnect);
 
     return () => {
-      socket.off('raceStarted');
-      socket.off('lobbyReset');
-      socket.off('lobbyUpdate');
+      socket.off('raceStarted', onRaceStarted);
+      socket.off('lobbyReset',  onLobbyReset);
+      socket.off('lobbyUpdate', onLobbyUpdate);
+      socket.off('reconnect',   onReconnect);
     };
   }, []);
 
   // ── Screen transitions ──────────────────────────────────────────────
   function handleGameCreated({ code, player, lobbyState }) {
+    lobbyCodeRef.current = code;
     setLobbyCode(code);
     setMyPlayer(player);
     setLobby(lobbyState);
@@ -57,6 +82,7 @@ export default function App() {
   }
 
   function handleGameJoined({ code, player, lobbyState }) {
+    lobbyCodeRef.current = code;
     setLobbyCode(code);
     setMyPlayer(player);
     setLobby(lobbyState);

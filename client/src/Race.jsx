@@ -37,6 +37,19 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
 
   const isHost = myPlayer?.isHost;
 
+  // ── Portrait orientation detection ──────────────────────────────────
+  // Drives the rotation trick: we rotate the landscape race UI -90° so it
+  // fills the screen naturally when the phone is held upright.
+  const [isPortrait, setIsPortrait] = useState(
+    () => window.matchMedia('(orientation: portrait)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: portrait)');
+    const onChange = (e) => setIsPortrait(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   // ── Audio manager lifecycle ─────────────────────────────────────────
   useEffect(() => {
     audioRef.current = new AudioManager();
@@ -121,20 +134,32 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
   return (
     /*
      * Portrait-mobile rotation wrapper.
-     * On portrait screens (phone held upright) we rotate the entire race UI
-     * 90° counter-clockwise so the landscape canvas fills the screen naturally.
-     * Width/height are swapped to match the rotated dimensions.
-     * On landscape or desktop nothing changes.
+     * On portrait screens we rotate the entire race UI -90° so the landscape
+     * canvas fills the screen naturally — like a forced landscape mode.
+     * All portrait styles are applied via JS inline styles to avoid the
+     * CSS specificity problem where inline styles beat Tailwind media classes.
+     * On landscape / desktop: isPortrait=false, zero style change.
      */
-    <div className="portrait:overflow-hidden portrait:fixed portrait:inset-0">
+    <div style={isPortrait ? { position: 'fixed', inset: 0, overflow: 'hidden' } : {}}>
       <div
-        className="flex flex-col px-3 py-2 portrait:[transform:rotate(-90deg)] portrait:[transform-origin:left_top] portrait:[width:100dvh] portrait:[height:100dvw] portrait:[position:absolute] portrait:[top:100%] portrait:[left:0]"
-        style={{ height: '100dvh' }}
+        className="flex flex-col px-3 py-2"
+        style={isPortrait ? {
+          transform:       'rotate(-90deg)',
+          transformOrigin: 'left top',
+          width:           '100dvh',
+          height:          '100dvw',
+          position:        'absolute',
+          top:             '100%',
+          left:            0,
+        } : { height: '100dvh' }}
       >
         {/* Title bar — compact, fixed height */}
         <div className="flex items-center justify-between mb-2 flex-shrink-0">
           <div>
-            <h1 className="font-display text-2xl tracking-widest text-[#f59e0b] leading-none portrait:text-lg">RACE IN PROGRESS</h1>
+            <h1
+              className="font-display tracking-widest text-[#f59e0b] leading-none"
+              style={{ fontSize: isPortrait ? '1.125rem' : '1.5rem' }}
+            >RACE IN PROGRESS</h1>
             <p className="text-[10px] text-[#7d8590] uppercase tracking-widest mt-0.5">
               Lobby: <span className="font-mono text-[#f59e0b]">{lobbyCode}</span>
             </p>
@@ -172,15 +197,17 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
               return (
                 <div
                   key={ev.id}
-                  className="px-8 py-3 rounded-2xl text-center font-semibold text-sm whitespace-nowrap portrait:text-xs portrait:px-4 portrait:py-2"
+                  className="rounded-2xl text-center font-semibold whitespace-nowrap"
                   style={{
                     background:  s.bg,
                     border:      `1px solid ${s.border}`,
                     boxShadow:   `0 0 24px ${s.glow}88`,
                     animation:   `event-enter 0.25s ease-out, event-exit ${EVENT_FADE_MS}ms ease-in ${fadeDelay}ms forwards`,
+                    padding:     isPortrait ? '0.375rem 1rem' : '0.75rem 2rem',
+                    fontSize:    isPortrait ? '0.7rem'        : '0.875rem',
                   }}
                 >
-                  <div className="text-white font-bold text-base portrait:text-sm">{ev.targetName}</div>
+                  <div className="text-white font-bold" style={{ fontSize: isPortrait ? '0.8rem' : '1rem' }}>{ev.targetName}</div>
                   <div className="text-[#e6edf3] mt-0.5">{ev.text}</div>
                 </div>
               );

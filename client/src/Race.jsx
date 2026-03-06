@@ -133,26 +133,26 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
 
   return (
     /*
-     * Portrait-mobile rotation wrapper.
-     * On portrait screens we rotate the entire race UI -90° so the landscape
-     * canvas fills the screen naturally — like a forced landscape mode.
-     * All portrait styles are applied via JS inline styles to avoid the
-     * CSS specificity problem where inline styles beat Tailwind media classes.
-     * On landscape / desktop: isPortrait=false, zero style change.
+     * Portrait-mobile rotation.
+     *
+     * The element is placed fixed and centered with its width/height already
+     * swapped (width=100dvh, height=100dvw). Rotating -90° around the default
+     * center origin (50% 50%) then makes the landscape canvas fill the full
+     * portrait screen with no parent clipping required.
+     *
+     * On landscape / desktop isPortrait=false and nothing changes.
      */
-    <div style={isPortrait ? { position: 'fixed', inset: 0, overflow: 'hidden' } : {}}>
-      <div
-        className="flex flex-col px-3 py-2"
-        style={isPortrait ? {
-          transform:       'rotate(-90deg)',
-          transformOrigin: 'left top',
-          width:           '100dvh',
-          height:          '100dvw',
-          position:        'absolute',
-          top:             '100%',
-          left:            0,
-        } : { height: '100dvh' }}
-      >
+    <div
+      className="flex flex-col px-3 py-2"
+      style={isPortrait ? {
+        position:  'fixed',
+        width:     '100dvh',
+        height:    '100dvw',
+        top:       'calc((100dvh - 100dvw) / 2)',
+        left:      'calc((100dvw - 100dvh) / 2)',
+        transform: 'rotate(-90deg)',
+      } : { height: '100dvh' }}
+    >
         {/* Title bar — compact, fixed height */}
         <div className="flex items-center justify-between mb-2 flex-shrink-0">
           <div>
@@ -237,7 +237,6 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
             onRestart={handleRestart}
           />
         )}
-      </div>
     </div>
   );
 }

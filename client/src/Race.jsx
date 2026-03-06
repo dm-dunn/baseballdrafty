@@ -145,10 +145,11 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
   const uiScale = canvasSize.h / CANVAS_HEIGHT;
 
   return (
-    <div className="flex flex-col px-3 py-2" style={{ height: '100dvh' }}>
+    <div className="flex flex-col" style={{ height: '100dvh' }}>
 
-      {/* Title bar — compact, fixed height */}
-      <div className="flex items-center justify-between mb-2 flex-shrink-0">
+      {/* Title bar — compact, fixed height. Keeps its own horizontal padding
+          so the canvas area can go fully edge-to-edge on small screens. */}
+      <div className="flex items-center justify-between mb-1 flex-shrink-0 px-2 pt-1 sm:px-3 sm:pt-2 sm:mb-2">
         <div>
           <h1 className="font-display text-2xl tracking-widest text-[#f59e0b] leading-none">
             RACE IN PROGRESS
@@ -224,12 +225,14 @@ export default function Race({ lobbyCode, myPlayer, initialMarbles }) {
             })}
           </div>
 
-          {/* Canvas element — fills the container exactly */}
+          {/* Canvas element — fills the container exactly.
+              On small screens scale up 1.2× so the diamond appears zoomed;
+              overflow:hidden on the container clips the outer empty border. */}
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="w-full h-full"
+            className="w-full h-full sm:scale-100 scale-[1.2]"
           />
         </div>
       </div>
